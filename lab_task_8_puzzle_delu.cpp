@@ -14,6 +14,7 @@ vector<vector<int>> ans;
 int minCost = INF;
 int n;
 bool f = false;
+string ans_move = "";
 
 bool isValid(int i, int j) {
     return i >= 0 && i < n && j >= 0 && j < n; 
@@ -21,15 +22,15 @@ bool isValid(int i, int j) {
 
 int calculateCost(vector<vector<int>>& grid) {
     int cost = 0;
-    int cnt = 1;
+    int cnt = 0;
 
     for(int i = 0; i < n; i++) {
         for(int j = 0; j < n; j++) {
+            cnt++;
             if(grid[i][j] == 0) continue;
             if(grid[i][j] != cnt) {
                 cost++;
             }
-            cnt++;
         }
     }
     return cost;
@@ -51,7 +52,7 @@ bool prevState(char di, int i) {
 }
 
 
-void solve(int i, int j, vector<vector<int>>& grid, vector<vector<int>>& vis, int g = 0, char di = NULL) {
+void solve(int i, int j, vector<vector<int>>& grid, vector<vector<int>>& vis, string& move, int g = 0, char di = NULL) {
 
     if(vis[i][j]) return;
     vis[i][j] = 1;
@@ -67,6 +68,8 @@ void solve(int i, int j, vector<vector<int>>& grid, vector<vector<int>>& vis, in
     // }
     if(calculateCost(grid) == 0) {
         minCost = cur_cost;
+        ans_move = move;
+        // printGrid(grid);
         // cout<<"minCost: "<<minCost<<endl;
         return;
     }
@@ -82,8 +85,10 @@ void solve(int i, int j, vector<vector<int>>& grid, vector<vector<int>>& vis, in
             if(prevState(di, d)) continue;
 
             swap(grid[i][j], grid[nrow][ncol]);
-            solve(nrow, ncol, grid, vis, g + 1, s[d]);
+            move += s[d];
+            solve(nrow, ncol, grid, vis, move, g + 1, s[d]);
             vis[i][j] = 0;
+            move.pop_back();
             swap(grid[i][j], grid[nrow][ncol]);
         }
     }
@@ -96,9 +101,9 @@ int main () {
     n = 3;
 
     vector<vector<int>> grid = {
-        {1, 0, 2},
-        {4, 5, 3},
-        {7, 8, 6}
+        {1, 2, 3},
+        {5, 6, 0},
+        {4, 7, 8}
     };
 
     int x, y;
@@ -113,9 +118,14 @@ int main () {
 
     vector<vector<int>> vis(3, vector<int>(3, 0));
 
-    solve(x, y, grid, vis);
-
-    cout<<"And guess what! the minimum cost to solve this 8 puzzle is = "<<minCost<<endl;
+    string move = "";
+    solve(x, y, grid, vis, move);
+    if(minCost == INF) {
+        cout<<"F**k it's an incorrect puzzle"<<endl;
+    } else {
+        cout<<"And guess what! the minimum cost to solve this 8 puzzle is = "<<minCost<<endl<<endl;;
+        cout<<"And the move to solve this shitty puzzle is: '"<<ans_move<<"'"<<endl;
+    }
     // cout<<"END"<<endl;
     return 0;
 }
